@@ -1,35 +1,38 @@
-#include<iostream>
-#include<string>
+#include <iostream>
+#include <string>
+#include <fcntl.h>
 
 using namespace std;
 
 int main()
 {
-  string first;
-  string second;
-  string third;
+  _setmode(_fileno(stdout), _O_U16TEXT);
+  _setmode(_fileno(stdin),  _O_U16TEXT);
 
-  cin >> first >> second >> third;
+  wstring first;
+  wstring second;
+  wstring third;
 
-  if(first < second && first < third)
+  wcin >> first >> second >> third;
+
+  if (first < second && first < third)
   {
-    cout << first;
+    wcout << first;
     return 0;
   }
-  else if(second < first && second < third)
+  else if (second < first && second < third)
   {
-    cout << second;
+    wcout << second;
     return 0;
   }
-  else if(third < first && third < second)
+  else if (third < first && third < second)
   {
-    cout << third;
+    wcout << third;
     return 0;
   }
   else
   {
-    cout << first;
-
+    wcout << first;
     return 0;
   }
 }

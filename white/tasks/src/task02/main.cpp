@@ -1,38 +1,28 @@
 #include <iostream>
 #include <string>
-#include <fcntl.h>
 
 using namespace std;
 
 int main()
 {
-  _setmode(_fileno(stdout), _O_U16TEXT);
-  _setmode(_fileno(stdin),  _O_U16TEXT);
+  string first;
+  string second;
+  string third;
 
-  wstring first;
-  wstring second;
-  wstring third;
+  cin >> first >> second >> third;
 
-  wcin >> first >> second >> third;
-
-  if (first < second && first < third)
+  if (first <= second && first <= third)
   {
-    wcout << first;
-    return 0;
+    cout << first;
   }
-  else if (second < first && second < third)
+  else if (second <= first && second <= third)
   {
-    wcout << second;
-    return 0;
-  }
-  else if (third < first && third < second)
-  {
-    wcout << third;
-    return 0;
+    cout << second;
   }
   else
   {
-    wcout << first;
-    return 0;
+    cout << first;
   }
+
+  return 0;
 }

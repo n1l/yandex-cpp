@@ -21,7 +21,7 @@ int main()
   }
   else
   {
-    cout << first;
+    cout << third;
   }
 
   return 0;

@@ -8,7 +8,7 @@
       "name": "g++.exe build and debug active file",
       "type": "cppdbg",
       "request": "launch",
-      "program": "C:/Project/yandex-cpp/white/tasks/src/task02/main.exe",
+      "program": "C:/Project/yandex-cpp/white/tasks/src/task05/main.exe",
       "args": [],
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}",

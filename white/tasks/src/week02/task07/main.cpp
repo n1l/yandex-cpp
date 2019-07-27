@@ -3,16 +3,28 @@
 
 using namespace std;
 
-vector<int> Reversed(const vector<int> &source)
+// vector<int> Reversed(const vector<int> &source)
+// {
+//   vector<int> result;
+
+//   for (int i = source.size() - 1; i >= 0; --i)
+//   {
+//     result.push_back(source[i]);
+//   }
+
+//   return result;
+// }
+
+vector<int> Reversed(const vector<int> &input)
 {
-  vector<int> result;
-
-  for (int i = source.size() - 1; i >= 0; --i)
+  auto seq = input;
+  for (int i = 0; i < seq.size() / 2; ++i)
   {
-    result.push_back(source[i]);
+    auto tmp = seq[i];
+    seq[i] = seq[seq.size() - 1 - i];
+    seq[seq.size() - 1 - i] = tmp;
   }
-
-  return result;
+  return seq;
 }
 
 int main()
@@ -23,7 +35,14 @@ int main()
 
   for (int item : rev)
   {
-    cout << item;
+    cout << item << " ";
+  }
+
+  cout << endl;
+
+  for (int item : source)
+  {
+    cout << item << " ";
   }
 
   return 0;

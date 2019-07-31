@@ -10,7 +10,7 @@ int main()
   cin >> q;
   vector<bool> is_nervous;
 
-  for (int i = 0; i < q; ++i)
+  for (int i = 0; i < q; i++)
   {
     string operation_code;
     cin >> operation_code;

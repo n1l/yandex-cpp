@@ -17,9 +17,11 @@ int main()
   }
 
   sort(begin(values), end(values),
-       [](string first, string second) {
-         return transform(first.begin(), first.end(), first.begin(), ::tolower) <
-                transform(second.begin(), second.end(), second.begin(), ::tolower);
+       [](const string &left, const string &right) {
+         return lexicographical_compare(
+             begin(left), end(left),
+             begin(right), end(right),
+             [](char c_left, char c_right) { return tolower(c_left) < tolower(c_right); });
        });
 
   for (string &value : values)

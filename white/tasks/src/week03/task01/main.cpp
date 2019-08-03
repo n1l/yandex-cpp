@@ -7,15 +7,13 @@ using namespace std;
 int main()
 {
   int ops;
-  vector<int> values;
-
   cin >> ops;
 
-  for (int i = 0; i < ops; i++)
+  vector<int> values(ops);
+
+  for (int &value : values)
   {
-    int value;
     cin >> value;
-    values.push_back(value);
   }
 
   sort(begin(values), end(values),

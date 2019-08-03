@@ -16,15 +16,14 @@ int main()
   {
     int stops_count;
     cin >> stops_count;
+    set<string> stops;
 
-    vector<string> input_stops(stops_count);
-
-    for (string &stop : input_stops)
+    for (int j = 0; j < stops_count; j++)
     {
+      string stop;
       cin >> stop;
+      stops.insert(stop);
     }
-
-    set<string> stops(begin(input_stops), end(input_stops));
 
     if (buses.count(stops) == 0)
     {

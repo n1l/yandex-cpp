@@ -83,7 +83,7 @@ private:
 
   string GetDataForYearWithHistory(const map<int, string> &history, int year)
   {
-    set<string> data_history;
+    vector<string> data_history;
     string data = "";
     string previous_data = "";
 
@@ -91,15 +91,12 @@ private:
     {
       if (item.first <= year)
       {
-        if (data != "")
-        {
-          previous_data = data;
-        }
-        if (previous_data != "")
-        {
-          data_history.insert(previous_data);
-        }
         data = item.second;
+        if (previous_data != "" && previous_data != data)
+        {
+          data_history.push_back(previous_data);
+        }
+        previous_data = data;
       }
       else
       {
@@ -109,24 +106,26 @@ private:
 
     string history_result = "";
 
-    for (const string &item : data_history)
+    for (int i = data_history.size() - 1; i >= 0; i--)
     {
       if (history_result != "")
       {
-        history_result += (", " + item);
+        history_result += (", " + data_history[i]);
       }
       else
       {
-        history_result += item;
+        history_result += data_history[i];
       }
     }
 
-    if (data == "" && history_result == "")
+    if (history_result == "")
     {
-      return "";
+      return data;
     }
-
-    return data + " (" + history_result + ')';
+    else
+    {
+      return data + " (" + history_result + ')';
+    }
   }
 
 private:

@@ -41,21 +41,91 @@ public:
     return first_name + ' ' + last_name;
   }
 
+  string GetFullNameWithHistory(int year)
+  {
+    string first_name = GetDataForYearWithHistory(first_name_history_, year),
+           last_name = GetDataForYearWithHistory(last_name_history_, year);
+
+    if (first_name == "" && last_name == "")
+    {
+      return "Incognito";
+    }
+
+    if (first_name != "" && last_name == "")
+    {
+      return first_name + ' ' + "with unknown last name";
+    }
+
+    if (last_name != "" && first_name == "")
+    {
+      return last_name + ' ' + "with unknown first name";
+    }
+
+    return first_name + ' ' + last_name;
+  }
+
 private:
   string GetDataForYear(const map<int, string> &history, int year)
   {
-    string last_name = "";
+    string data = "";
     for (const auto &item : history)
     {
       if (item.first > year)
       {
-        return last_name;
+        return data;
       }
 
-      last_name = item.second;
+      data = item.second;
     }
 
-    return last_name;
+    return data;
+  }
+
+  string GetDataForYearWithHistory(const map<int, string> &history, int year)
+  {
+    vector<string> data_history;
+    string data = "";
+    string previous_data = "";
+
+    for (const auto &item : history)
+    {
+      if (item.first <= year)
+      {
+        data = item.second;
+        if (previous_data != "" && previous_data != data)
+        {
+          data_history.push_back(previous_data);
+        }
+        previous_data = data;
+      }
+      else
+      {
+        break;
+      }
+    }
+
+    string history_result = "";
+
+    for (int i = data_history.size() - 1; i >= 0; i--)
+    {
+      if (history_result != "")
+      {
+        history_result += (", " + data_history[i]);
+      }
+      else
+      {
+        history_result += data_history[i];
+      }
+    }
+
+    if (history_result == "")
+    {
+      return data;
+    }
+    else
+    {
+      return data + " (" + history_result + ')';
+    }
   }
 
 private:

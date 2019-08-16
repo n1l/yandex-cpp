@@ -5,7 +5,6 @@
 
 using namespace std;
 
-//C:/Project/yandex-cpp/white/tasks/src/week04/task06
 int main()
 {
   const string path = "input.txt";

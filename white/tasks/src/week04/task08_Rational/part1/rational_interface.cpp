@@ -109,15 +109,6 @@ int main()
   }
 
   {
-    const Rational r(-2, -3);
-    if (r.Numerator() != 2 || r.Denominator() != 3)
-    {
-      cout << "Rational(-2, -3) != 2/3" << endl;
-      return 4;
-    }
-  }
-
-  {
     const Rational r(0, 15);
     if (r.Numerator() != 0 || r.Denominator() != 1)
     {

@@ -9,32 +9,22 @@ using namespace std;
  */
 int main()
 {
-  int a, b, c;
-
+  int a, b;
   cin >> a >> b;
 
-  if(b > a)
+  while (a > 0 && b > 0)
   {
-    c = b;
-    b = a;
-    a = c;
+    if (a > b)
+    {
+      a %= b;
+    }
+    else
+    {
+      b %= a;
+    }
   }
 
-  c = 0;
-
-  while (b)
-  {
-    c = a % b;
-    a = b;
-    b = c;
-  }
-
-  if (a < 0)
-  {
-    cout << -a;
-  }
-
-  cout << a;
+  cout << a + b;
 
   return 0;
 }

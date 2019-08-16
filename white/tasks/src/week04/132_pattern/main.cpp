@@ -3,6 +3,7 @@
 
 using namespace std;
 
+
 bool find132pattern(vector<int> &nums)
 {
   for (int i = 0; i < nums.size() - 2; i++)

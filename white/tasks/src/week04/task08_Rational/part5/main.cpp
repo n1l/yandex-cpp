@@ -1,5 +1,8 @@
 #include <iostream>
 #include <sstream>
+#include <vector>
+#include <map>
+#include <set>
 
 using namespace std;
 
@@ -76,6 +79,13 @@ bool operator==(const Rational &left, const Rational &right)
   return left.Numerator() == right.Numerator() && left.Denominator() == right.Denominator();
 }
 
+bool operator<(const Rational &left, const Rational &right)
+{
+  int leftNumerator = left.Numerator() * right.Denominator();
+  int rightNumerator = right.Numerator() * left.Denominator();;
+  return leftNumerator < rightNumerator;
+}
+
 Rational operator+(const Rational &left, const Rational &right)
 {
   int numerator = (left.Numerator() * right.Denominator()) + (right.Numerator() * left.Denominator());
@@ -131,65 +141,36 @@ ostream &operator<<(ostream &stream, const Rational &source)
 int main()
 {
   {
-    ostringstream output;
-    output << Rational(-6, 8);
-    if (output.str() != "-3/4")
+    const set<Rational> rs = {{1, 2}, {1, 25}, {3, 4}, {3, 4}, {1, 2}};
+    if (rs.size() != 3)
     {
-      cout << "Rational(-6, 8) should be written as \"-3/4\"" << endl;
+      cout << "Wrong amount of items in the set" << endl;
       return 1;
     }
-  }
 
-  {
-    ostringstream output;
-    output << Rational(2, 1);
-    if (output.str() != "2/1")
+    vector<Rational> v;
+    for (auto x : rs)
     {
-      cout << "Rational(2, 1) should be written as \"2/1\"" << endl;
-      return 1;
+      v.push_back(x);
     }
-  }
-
-  {
-    istringstream input("5/7");
-    Rational r;
-    input >> r;
-    bool equal = r == Rational(5, 7);
-    if (!equal)
+    if (v != vector<Rational>{{1, 25}, {1, 2}, {3, 4}})
     {
-      cout << "5/7 is incorrectly read as " << r << endl;
+      cout << "Rationals comparison works incorrectly" << endl;
       return 2;
     }
   }
 
   {
-    ostringstream output;
-    output << Rational(3, -4);
-    if (output.str() != "-3/4")
-    {
-      cout << "Rational(-6, 8) should be written as \"-3/4\"" << endl;
-      return 1;
-    }
-  }
+    map<Rational, int> count;
+    ++count[{1, 2}];
+    ++count[{1, 2}];
 
-  {
-    istringstream input("5/7 10/8");
-    Rational r1, r2;
-    input >> r1 >> r2;
-    bool correct = r1 == Rational(5, 7) && r2 == Rational(5, 4);
-    if (!correct)
+    ++count[{2, 3}];
+
+    if (count.size() != 2)
     {
-      cout << "Multiple values are read incorrectly: " << r1 << " " << r2 << endl;
+      cout << "Wrong amount of items in the map" << endl;
       return 3;
-    }
-
-    input >> r1;
-    input >> r2;
-    correct = r1 == Rational(5, 7) && r2 == Rational(5, 4);
-    if (!correct)
-    {
-      cout << "Read from empty stream shouldn't change arguments: " << r1 << " " << r2 << endl;
-      return 4;
     }
   }
 

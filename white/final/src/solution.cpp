@@ -1,128 +1,65 @@
+#include <iomanip>
 #include <iostream>
-#include <string>
-#include <sstream>
 #include <map>
 #include <set>
-#include <iomanip>
-#include <exception>
+#include <sstream>
+#include <stdexcept>
+#include <string>
+#include <vector>
 
 using namespace std;
 
 class Date
 {
 public:
-  Date(int year = 0, int month = 1, int day = 1)
+  // конструктор выбрасывает исключение, если его аргументы некорректны
+  Date(int new_year, int new_month, int new_day)
   {
-    if (month < 1 || month > 12)
+    year = new_year;
+    if (new_month > 12 || new_month < 1)
     {
-      throw invalid_argument("Month value is invalid: " + to_string(month));
+      throw logic_error("Month value is invalid: " + to_string(new_month));
     }
-
-    if (day < 1 || day > 31)
+    month = new_month;
+    if (new_day > 31 || new_day < 1)
     {
-      throw invalid_argument("Day value is invalid: " + to_string(day));
+      throw logic_error("Day value is invalid: " + to_string(new_day));
     }
-
-    year_ = year;
-    month_ = month;
-    day_ = day;
+    day = new_day;
   }
 
   int GetYear() const
   {
-    return year_;
+    return year;
   }
-
   int GetMonth() const
   {
-    return month_;
+    return month;
   }
-
   int GetDay() const
   {
-    return day_;
+    return day;
   }
 
 private:
-  int day_;
-  int month_;
-  int year_;
+  int year;
+  int month;
+  int day;
 };
-Date d1 = {1920, 10, 1};
-Date d2 = {1919, 12, 2};
-bool operator<(const Date &left, const Date &right)
+
+// определить сравнение для дат необходимо для использования их в качестве ключей словаря
+bool operator<(const Date &lhs, const Date &rhs)
 {
-  int left_in_days = left.GetDay() + left.GetMonth() * 31 + left.GetYear() * 365;
-  int right_in_days = right.GetDay() + right.GetMonth() * 31 + right.GetYear() * 365;
-  return left_in_days < right_in_days;
+  // воспользуемся тем фактом, что векторы уже можно сравнивать на <:
+  // создадим вектор из года, месяца и дня для каждой даты и сравним их
+  return vector<int>{lhs.GetYear(), lhs.GetMonth(), lhs.GetDay()} <
+         vector<int>{rhs.GetYear(), rhs.GetMonth(), rhs.GetDay()};
 }
 
+// даты будут по умолчанию выводиться в нужном формате
 ostream &operator<<(ostream &stream, const Date &date)
 {
-  stream << setw(4) << setfill('0') << date.GetYear() << '-';
-  stream << setw(2) << setfill('0') << date.GetMonth() << '-';
-  stream << setw(2) << setfill('0') << date.GetDay();
-  return stream;
-}
-
-istream &operator>>(istream &stream, Date &date)
-{
-  int year, month, day, symbol;
-  char delimiter, end;
-  string input;
-
-  stream >> input;
-
-  stringstream input_stream(input);
-
-  symbol = input_stream.peek();
-  if (isdigit(symbol) || symbol == '-' || symbol == '+')
-  {
-    input_stream >> year;
-  }
-  else
-  {
-    throw invalid_argument("Wrong date format: " + input);
-  }
-
-  input_stream >> delimiter;
-  if (delimiter != '-')
-  {
-    throw invalid_argument("Wrong date format: " + input);
-  }
-
-  symbol = input_stream.peek();
-  if (isdigit(symbol) || symbol == '-' || symbol == '+')
-  {
-    input_stream >> month;
-  }
-  else
-  {
-    throw invalid_argument("Wrong date format: " + input);
-  }
-
-  input_stream >> delimiter;
-  if (delimiter != '-')
-  {
-    throw invalid_argument("Wrong date format: " + input);
-  }
-
-  symbol = input_stream.peek();
-  if (isdigit(symbol) || symbol == '-' || symbol == '+')
-  {
-    input_stream >> day;
-  }
-  else
-  {
-    throw invalid_argument("Wrong date format: " + input);
-  }
-
-  if (input_stream.peek() != EOF)
-  {
-    throw invalid_argument("Wrong date format: " + input);
-  }
-
-  date = Date(year, month, day);
+  stream << setw(4) << setfill('0') << date.GetYear() << "-" << setw(2) << setfill('0') << date.GetMonth() << "-" << setw(2) << setfill('0') << date.GetDay();
   return stream;
 }
 
@@ -131,179 +68,127 @@ class Database
 public:
   void AddEvent(const Date &date, const string &event)
   {
-    if (event != "")
-    {
-      db_[date].insert(event);
-    }
+    storage[date].insert(event);
   }
 
   bool DeleteEvent(const Date &date, const string &event)
   {
-    if (db_.count(date) == 0)
+    if (storage.count(date) > 0 && storage[date].count(event) > 0)
     {
-      return false;
+      storage[date].erase(event);
+      return true;
     }
-
-    set<string> &events = db_[date];
-    if (events.count(event) == 0)
-    {
-      return false;
-    }
-
-    events.erase(event);
-    return true;
+    return false;
   }
 
   int DeleteDate(const Date &date)
   {
-    int result = 0;
-    if (db_.count(date) > 0)
+    if (storage.count(date) == 0)
     {
-      result = db_[date].size();
-      db_.erase(date);
+      return 0;
     }
-
-    return result;
+    else
+    {
+      const int event_count = storage[date].size();
+      storage.erase(date);
+      return event_count;
+    }
   }
 
-  void Find(const Date &date) const
+  set<string> Find(const Date &date) const
   {
-    if (db_.count(date) == 0)
+    if (storage.count(date) > 0)
     {
-      return;
+      return storage.at(date);
     }
-
-    set<string> events = db_.at(date);
-    for (const string event : events)
+    else
     {
-      cout << event << endl;
+      return {};
     }
   }
 
   void Print() const
   {
-    for (const auto &event : db_)
+    for (const auto &item : storage)
     {
-      for (const string &event_title : event.second)
+      for (const string &event : item.second)
       {
-        cout << event.first << ' ' << event_title << endl;
+        cout << item.first << " " << event << endl;
       }
     }
   }
 
 private:
-  map<Date, set<string>> db_;
+  map<Date, set<string>> storage;
 };
 
-struct Command
+Date ParseDate(const string &date)
 {
-  string text;
-  string event;
-  Date date;
-};
+  istringstream date_stream(date);
+  bool ok = true;
 
-istream &operator>>(istream &stream, Command &command)
-{
-  string command_text, event_title;
-  Date date;
+  int year;
+  ok = ok && (date_stream >> year);
+  ok = ok && (date_stream.peek() == '-');
+  date_stream.ignore(1);
 
-  stream >> command_text;
-  if ((command_text == "Print")
-      || (command_text == "" || command_text != "Del" && command_text != "Add" && command_text != "Find"))
+  int month;
+  ok = ok && (date_stream >> month);
+  ok = ok && (date_stream.peek() == '-');
+  date_stream.ignore(1);
+
+  int day;
+  ok = ok && (date_stream >> day);
+  ok = ok && date_stream.eof();
+
+  if (!ok)
   {
-    command = {command_text};
-    return stream;
+    throw logic_error("Wrong date format: " + date);
   }
-
-  stream >> date;
-  stream >> event_title;
-  if (stream)
-  {
-    command = {command_text, event_title, date};
-  }
-  else
-  {
-    command = {command_text, "", date};
-  }
-
-  return stream;
+  return Date(year, month, day);
 }
-
-/* case #1
-Add 0-1-2 event1
-Add 1-2-3 event2
-Print
-*/
-
-/* case #2
-Add 0-1-2 event1
-Add 1-2-3 event2
-Find 0-1-2
-
-Del 0-1-2
-Print
-Del 1-2-3 event2
-Del 1-2-3 event2
-*/
-
-/* case #3
-Adskjdksjdksjdskd 1-2-3 event2
-*/
-
-/* case #4
-Add fjdkjfklsdjfkldsjk event1
-*/
-
-/* case #5
-Del 0-1-2
-Find 0-1-2
-Add 0-1-2 event1
-Add 1-2-3 event2
-Find 0-1-2
-Del 0-1-2
-*/
-
-/* case #6
-Add 0-1-2a event1
-Add 0a-1-2 event1
-Add 0-1a-2 event1
-Add 1-2-3 event1
-*/
-
-/* case #7
-Add +0-+1-+2 event1
-Add -0--1--2 event1
-Add -0---1-2 event1
-Add 1/2/3 event1
-*/
 
 int main()
 {
-  Database db;
-  Command command;
-
-  string command_text;
-
-  while (getline(cin, command_text))
+  try
   {
-    try
-    {
-      stringstream command_stream(command_text);
-      command_stream >> command;
+    Database db;
 
-      if (command.text == "Add")
+    string command_line;
+    while (getline(cin, command_line))
+    {
+      stringstream ss(command_line);
+
+      string command;
+      ss >> command;
+
+      if (command == "Add")
       {
-        db.AddEvent(command.date, command.event);
+
+        string date_str, event;
+        ss >> date_str >> event;
+        const Date date = ParseDate(date_str);
+        db.AddEvent(date, event);
       }
-      else if (command.text == "Find")
+      else if (command == "Del")
       {
-        db.Find(command.date);
-      }
-      else if (command.text == "Del")
-      {
-        if (command.event != "")
+
+        string date_str;
+        ss >> date_str;
+        string event;
+        if (!ss.eof())
         {
-          if (db.DeleteEvent(command.date, command.event))
+          ss >> event;
+        }
+        const Date date = ParseDate(date_str);
+        if (event.empty())
+        {
+          const int count = db.DeleteDate(date);
+          cout << "Deleted " << count << " events" << endl;
+        }
+        else
+        {
+          if (db.DeleteEvent(date, event))
           {
             cout << "Deleted successfully" << endl;
           }
@@ -312,29 +197,33 @@ int main()
             cout << "Event not found" << endl;
           }
         }
-        else
+      }
+      else if (command == "Find")
+      {
+
+        string date_str;
+        ss >> date_str;
+        const Date date = ParseDate(date_str);
+        for (const string &event : db.Find(date))
         {
-          int deleted = db.DeleteDate(command.date);
-          cout << "Deleted " << deleted << " events" << endl;
+          cout << event << endl;
         }
       }
-      else if (command.text == "Print")
+      else if (command == "Print")
       {
+
         db.Print();
       }
-      else if (command.text == "")
+      else if (!command.empty())
       {
-        continue;
-      }
-      else
-      {
-        cout << "Unknown command: " << command.text << endl;
+
+        throw logic_error("Unknown command: " + command);
       }
     }
-    catch (const exception &e)
-    {
-      cout << e.what() << endl;
-    }
+  }
+  catch (const exception &e)
+  {
+    cout << e.what() << endl;
   }
 
   return 0;

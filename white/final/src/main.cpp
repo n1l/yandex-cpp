@@ -1,8 +1,10 @@
 #include <iostream>
 #include <string>
+#include <sstream>
 #include <map>
 #include <set>
 #include <iomanip>
+#include <exception>
 
 using namespace std;
 
@@ -18,7 +20,7 @@ public:
 
     if (day < 1 || day > 31)
     {
-      throw invalid_argument("«Day value is invalid: " + to_string(day));
+      throw invalid_argument("Day value is invalid: " + to_string(day));
     }
 
     year_ = year;
@@ -46,22 +48,13 @@ private:
   int month_;
   int year_;
 };
-
+Date d1 = {1920, 10, 1};
+Date d2 = {1919, 12, 2};
 bool operator<(const Date &left, const Date &right)
 {
-  if (left.GetYear() < right.GetYear())
-  {
-    if (left.GetMonth() < right.GetMonth())
-    {
-      if (left.GetDay() < right.GetDay())
-      {
-        return true;
-      }
-      return false;
-    }
-    return false;
-  }
-  return false;
+  int left_in_days = left.GetDay() + left.GetMonth() * 31 + left.GetYear() * 365;
+  int right_in_days = right.GetDay() + right.GetMonth() * 31 + right.GetYear() * 365;
+  return left_in_days < right_in_days;
 }
 
 ostream &operator<<(ostream &stream, const Date &date)
@@ -74,23 +67,62 @@ ostream &operator<<(ostream &stream, const Date &date)
 
 istream &operator>>(istream &stream, Date &date)
 {
-  int year, month, day;
-  char delimiter;
+  int year, month, day, symbol;
+  char delimiter, end;
   string input;
 
   stream >> input;
 
   stringstream input_stream(input);
-  input_stream >> year >> delimiter >> month >> delimiter >> day;
-  if (input_stream && delimiter == '-')
+
+  symbol = input_stream.peek();
+  if (isdigit(symbol) || symbol == '-' || symbol == '+')
   {
-    date = Date(year, month, day);
+    input_stream >> year;
   }
   else
   {
     throw invalid_argument("Wrong date format: " + input);
   }
 
+  input_stream >> delimiter;
+  if (delimiter != '-')
+  {
+    throw invalid_argument("Wrong date format: " + input);
+  }
+
+  symbol = input_stream.peek();
+  if (isdigit(symbol) || symbol == '-' || symbol == '+')
+  {
+    input_stream >> month;
+  }
+  else
+  {
+    throw invalid_argument("Wrong date format: " + input);
+  }
+
+  input_stream >> delimiter;
+  if (delimiter != '-')
+  {
+    throw invalid_argument("Wrong date format: " + input);
+  }
+
+  symbol = input_stream.peek();
+  if (isdigit(symbol) || symbol == '-' || symbol == '+')
+  {
+    input_stream >> day;
+  }
+  else
+  {
+    throw invalid_argument("Wrong date format: " + input);
+  }
+
+  if (input_stream.peek() != EOF)
+  {
+    throw invalid_argument("Wrong date format: " + input);
+  }
+
+  date = Date(year, month, day);
   return stream;
 }
 
@@ -99,7 +131,10 @@ class Database
 public:
   void AddEvent(const Date &date, const string &event)
   {
-    db_[date].insert(event);
+    if (event != "")
+    {
+      db_[date].insert(event);
+    }
   }
 
   bool DeleteEvent(const Date &date, const string &event)
@@ -173,16 +208,13 @@ istream &operator>>(istream &stream, Command &command)
   Date date;
 
   stream >> command_text;
-  if (command_text == "")
+  if ((command_text == "Print")
+      || (command_text == "" || command_text != "Del" && command_text != "Add" && command_text != "Find"))
   {
     command = {command_text};
     return stream;
   }
-  if (command_text == "Print")
-  {
-    command = {command_text};
-    return stream;
-  }
+
   stream >> date;
   stream >> event_title;
   if (stream)
@@ -231,12 +263,27 @@ Find 0-1-2
 Del 0-1-2
 */
 
+/* case #6
+Add 0-1-2a event1
+Add 0a-1-2 event1
+Add 0-1a-2 event1
+Add 1-2-3 event1
+*/
+
+/* case #7
+Add +0-+1-+2 event1
+Add -0--1--2 event1
+Add -0---1-2 event1
+Add 1/2/3 event1
+*/
+
 int main()
 {
   Database db;
   Command command;
 
   string command_text;
+
   while (getline(cin, command_text))
   {
     try
